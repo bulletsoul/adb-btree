@@ -39,7 +39,7 @@ The record needs to be in quotes because it could contain spaces and other punct
 
 ::
 
-$ INDEX -insert <index filename> "new text line to be inserted." 
+$ INDEX -insert <index filename> "new text line to be inserted."
 
 List sequential records
 ~~~~~~~~~~~~~~~~~~~~~~~
