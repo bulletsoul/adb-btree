@@ -5,7 +5,7 @@ Implement BTree Indexing. Read a text file containing data and build the index, 
 The length of the key will be specified when you create the index and must be stored in the metadata.
 Long (8-byte) record address for your pointers, "pointers" are the byte offset in the text file of the data record
 
-The structure of the index is as follows:  First 256 bytes: Name of the text file you have indexed. This must be blank-filled on the right. You may need other metadata in this first block (such as the key length), hence first 1K data blocked for the purpose. Included input file is btree.txt. Output index file name is INDEX.
+The structure of the index is as follows:  First 256 bytes: Name of the text file you have indexed. This must be blank-filled on the right. You may need other metadata in this first block (such as the key length), hence first 1K data blocked for the purpose. Included input file is btree.txt. Assuming the name of program is INDEX.
 
 ## Usage
 ### Creating an Index
@@ -35,3 +35,15 @@ If no record exists with the given key, show records that contain the next-large
 Show the records in order by key and their position within the text file.
 
 	$ INDEX -list <index filename> <starting key> <count>
+	
+## Example
+
+	$ INDEX –create 14 CS6360Asg5.txt btree.index
+	
+	$ INDEX -find btree.index 64541668700164B
+	$ At 2127, record:  64541668700164B ANESTH, BIOPSY OF NOSE
+	
+	$ INDEX -insert btree.index "64541668700164B Some new Record"
+	
+	$ INDEX -list btree.index "64541668700164B" 10
+	
