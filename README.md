@@ -38,7 +38,7 @@ Show the records in order by key and their position within the text file.
 	
 ## Example
 
-	$ INDEX –create 14 CS6360Asg5.txt btree.index
+	$ INDEX –create 14 btree.txt btree.index
 	
 	$ INDEX -find btree.index 64541668700164B
 	$ At 2127, record:  64541668700164B ANESTH, BIOPSY OF NOSE
