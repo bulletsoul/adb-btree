@@ -47,3 +47,6 @@ Show the records in order by key and their position within the text file.
 	
 	$ INDEX -list btree.index "64541668700164B" 10
 	
+## License
+
+MIT: http://vineetdhanawat.mit-license.org/
