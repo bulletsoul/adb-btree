@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const int MaxKeys = 11;   // max number of keys in a node
+const int MaxKeys = 10;   // max number of keys in a node
 const int MaxKeysPlusOne = MaxKeys + 1;  // Order of the B Tree
 const int MinKeys = 5;    // min number of keys in a node
 const long NilPtr = -1L;   // the L indicates a long int
@@ -50,9 +50,10 @@ typedef struct
 
 typedef struct
     {
-        int Count;               // Number of keys stored in the current node
-        ItemType Key[MaxKeys];   // Warning: indexing starts at 0, not 1
-        long Branch[MaxKeysPlusOne];   // Fake pointers to child nodes
+        int Count;               		// Number of keys stored in the current node
+        ItemType Key[MaxKeys];   		// Warning: indexing starts at 0, not 1
+        long Branch[MaxKeysPlusOne];   	// Fake pointers to child nodes
+        bool     Deleted[MaxKeys];		// List of deleted nodes
     } NodeType;
 
 /**
@@ -88,6 +89,7 @@ class BTTableClass: public TableBaseClass
     ~BTTableClass(void);
     bool Empty(void) const;
     bool Insert(const ItemType & Item);
+    void DeleteItem(KeyFieldType SearchKey);
     bool Retrieve(KeyFieldType SearchKey, ItemType & Item);
     bool RetrieveList(KeyFieldType SearchKey, ItemType & Item);
     private:
@@ -221,8 +223,8 @@ bool BTTableClass::Empty(void) const
 bool BTTableClass::SearchNode(const KeyFieldType Target,
    int & Location) const
 {
-    bool Found;
-    Found = false;
+    bool Found = false;
+    
     if (strcmp(Target, CurrentNode.Key[0].KeyField) < 0)
         Location = -1;
     else
@@ -411,12 +413,9 @@ bool BTTableClass::Insert(const ItemType & Item)
 */
 bool BTTableClass::Retrieve(KeyFieldType SearchKey, ItemType & Item)
 {
-    long CurrentRoot;
+    long CurrentRoot = Root;
+    bool Found = false;
     int Location;
-    bool Found;
-
-    Found = false;
-    CurrentRoot = Root;
 
     while ((CurrentRoot != NilPtr) && (! Found))
     {
@@ -425,8 +424,15 @@ bool BTTableClass::Retrieve(KeyFieldType SearchKey, ItemType & Item)
 
         if (SearchNode(SearchKey, Location))
         {
-            Found = true;
-            Item = CurrentNode.Key[Location];
+			/*if (!CurrentNode.Deleted[Location])
+			{
+				Found = true;
+				Item = CurrentNode.Key[Location];
+			}*/
+				Found = true;
+				Item = CurrentNode.Key[Location];
+			cout << CurrentNode.Deleted[Location] << "<-retrieve location\n";
+			break;
         }
         else
             CurrentRoot = CurrentNode.Branch[Location + 1];
@@ -490,6 +496,37 @@ bool BTTableClass::RetrieveList(KeyFieldType SearchKey, ItemType & Item)
     }
     return Found;
 }
+
+
+/**
+ * TODO
+ * Function to delete node 
+ */
+void BTTableClass::DeleteItem(KeyFieldType SearchKey)
+{    
+    long CurrentRoot = Root;
+    bool Found = false;
+    int Location;
+
+    while ((CurrentRoot != NilPtr) && (! Found))
+    {
+        DataFile.seekg(CurrentRoot * NodeSize + 1024, ios::beg);
+        DataFile.read(reinterpret_cast <char *> (&CurrentNode), NodeSize);
+
+        if (SearchNode(SearchKey, Location))
+        {
+			cout << "loc: " << Location << '\n';	//debug
+			CurrentNode.Deleted[Location] = true;
+			cout << "del: " << CurrentNode.Deleted[Location] << '\n';	//debug
+            DataFile.seekp(CurrentRoot * NodeSize, ios::beg);
+            DataFile.write(reinterpret_cast <char *> (&CurrentNode), NodeSize);
+			return;
+        }
+        else
+            CurrentRoot = CurrentNode.Branch[Location + 1];
+    }
+}
+
 
 /**
 * Function used to readline from the InputFile
@@ -669,6 +706,30 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    if(strcmp(argv[1],"-delete") == 0)
+    {
+		ItemType Item;
+        IndexFileName = argv[2];
+        char Record [50];
+        char SearchKey [15];
+        bool notfound = false;
+        strcpy(Record,argv[3]);
+        
+        {
+            BTTableClass BTTable('r', IndexFileName);
+            if (BTTable.Empty())
+                Error("Table is empty");
+            int i;
+            for (i=0;i<KeyFieldMax;i++)
+            {
+                SearchKey[i]=Record[i];
+            }
+            SearchKey[i]= NULLCHAR;
+            
+            BTTable.DeleteItem(SearchKey);
+        }
+	}
+    
     if (strcmp(argv[1],"-list") == 0)
     {
         // Retrieves list of records in that particular branch
