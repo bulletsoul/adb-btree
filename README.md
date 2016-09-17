@@ -9,7 +9,7 @@ The structure of the index is as follows:  First 256 bytes: Name of the text fil
 
 ## Usage
 ### Creating an Index
-Parameters - key length, a text file name, and an output index.  If output index exists, overwrite it.
+Parameters - key length (e.g. 11 for StudentNo), a text file name, and an output index.  If output index exists, overwrite it.
 Duplicates should not be inserted
 
 	$ INDEX –create <length> <input file> <output file>
@@ -29,13 +29,7 @@ The record needs to be in quotes because it could contain spaces and other punct
 
 	$ INDEX -insert <index filename> "new text line to be inserted."
 
-### List sequential records
-Show the record containing the given key and the next n records following it, if there are that many.
-If no record exists with the given key, show records that contain the next-larger key and give a message that the actual key was not found.
-Show the records in order by key and their position within the text file.
 
-	$ INDEX -list <index filename> <starting key> <count>
-	
 ## Example
 
 	$ INDEX –create 14 btree.txt btree.index
@@ -44,9 +38,7 @@ Show the records in order by key and their position within the text file.
 	$ At 2127, record:  64541668700164B ANESTH, BIOPSY OF NOSE
 	
 	$ INDEX -insert btree.index "64541668700164B Some new Record"
-	
-	$ INDEX -list btree.index "64541668700164B" 10
-	
+		
 ## License
 
 MIT: http://vineetdhanawat.mit-license.org/
