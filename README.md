@@ -38,6 +38,8 @@ The record needs to be in quotes because it could contain spaces and other punct
 	$ At 8951, record: 2016-29737;Elva Griffith;1907-07-27;MS;CS;41;
 	
 	$ ./btree -insert student.index "2000-1234;Bilbo Baggins;1900-01-01;MS;CS;140"
+
+	$ ./btree -delete student.index 2016-29737
 		
 ## License
 
