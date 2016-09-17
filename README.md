@@ -9,17 +9,17 @@ The structure of the index is as follows:  First 256 bytes: Name of the text fil
 
 ## Usage
 ### Creating an Index
-Parameters - key length (e.g. 11 for StudentNo), a text file name, and an output index.  If output index exists, overwrite it.
+Parameters - key length (e.g. 10 for StudentNo), a text file name, and an output index.  If output index exists, overwrite it.
 Duplicates should not be inserted
 
-	$ INDEX –create <length> <input file> <output file>
+	$ ./btree –create <length> <input file> <output file>
 
 ### Find a record by key
 Displays the entire record, including the key, and gives its position, in bytes, within the file.
 If the key is not in your index, the program must give a message to that effect.
 If the key supplied is longer than the key length specified for the index, truncate it. If it is shorter, pad with blanks on the right.
 
-	$ INDEX -find <index filename> <key>
+	$ ./btree -find <index filename> <key>
 
 ### Insert a new text record
 First n bytes must contain a unique key, where n was specified when you created the index. 
@@ -27,17 +27,17 @@ If the key is not in the index, write the record at the end of the data file (re
 If the key is already in the index, return a message to that effect and do not insert the record.
 The record needs to be in quotes because it could contain spaces and other punctuation.
 
-	$ INDEX -insert <index filename> "new text line to be inserted."
+	$ ./btree -insert <index filename> "new text line to be inserted."
 
 
 ## Example
 
-	$ INDEX –create 14 btree.txt btree.index
+	$ ./btree -create 10 student.csv student.index
 	
-	$ INDEX -find btree.index 64541668700164B
-	$ At 2127, record:  64541668700164B ANESTH, BIOPSY OF NOSE
+	$ ./btree -find student.index 2016-29737
+	$ At 8951, record: 2016-29737;Elva Griffith;1907-07-27;MS;CS;41;
 	
-	$ INDEX -insert btree.index "64541668700164B Some new Record"
+	$ ./btree -insert student.index "2000-1234;Bilbo Baggins;1900-01-01;MS;CS;140"
 		
 ## License
 

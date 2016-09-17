@@ -17,10 +17,13 @@ const int MinKeys = 5;    // min number of keys in a node
 const long NilPtr = -1L;   // the L indicates a long int
 int KeyFieldMax = 15; // Max allowed length of key
 const int KFMaxPlus1 = 15; //KeyFieldMax + 1;
-int DataFieldMax = 46; // Max allowed length of Data in a line
+
+// Max allowed length of Data in a line
+// For now set it to 85, but ideally, should be the sum of all table column's size
+int DataFieldMax = 85; 
 int DFMaxPlus1 = DataFieldMax + 1;
 const int NULLCHAR = '\0';  // NULL character used to mark end of a string
-const int LineMax = 46;//KeyFieldMax + DFMaxPlus1;
+const int LineMax = 85;//KeyFieldMax + DFMaxPlus1;
 int ListCount = 0;
 long offset=0;
 
@@ -174,10 +177,11 @@ BTTableClass::BTTableClass(char Mode, char * FileName)
         CurrentNode.Branch[2] = Root;
         DataFile.seekp(1024, ios::beg);
         DataFile.write(reinterpret_cast <char *> (&CurrentNode), NodeSize);
-
     }
     else
-        Error("Incorrect mode given to BTTableClass constructor");
+    {
+		Error("Incorrect mode given to BTTableClass constructor");
+	}
 }
 
 /**
@@ -340,7 +344,10 @@ void BTTableClass::PushDown(const ItemType & CurrentItem, long CurrentRoot,
         DataFile.read(reinterpret_cast <char *> (&CurrentNode), NodeSize);
 
         if (SearchNode(CurrentItem.KeyField, Location))
-            Error("Error: attempt to put a duplicate into B-tree");
+        {
+			cout << CurrentItem.KeyField << '\n';
+			Error("Error: attempt to put a duplicate into B-tree");
+		}
 
         PushDown(CurrentItem, CurrentNode.Branch[Location + 1], MoveUp,
          NewItem, NewRight);
@@ -581,7 +588,7 @@ int main(int argc, char* argv[])
 		start = clock();
 
         if (BTTable.Retrieve(SearchKey, Item))
-        {			
+        {	
             fstream OldInputFile;
             string line;
             OldInputFile.open(InputFileName, ios::in | ios::binary);
@@ -597,15 +604,15 @@ int main(int argc, char* argv[])
                 int currentLength = line.length();
                 offset += currentLength;
             }
+            
+            // end timing of retrieval operation
+			duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+			cout << "Query ran in " << duration << "ms\n";
         }
         else
         {
 			cout << "Not found" << endl;
 		}
-		
-		// end timing of retrieval operation
-		duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
-		cout << "Query ran in " << duration << "ms\n";
             
 		return 0;
     }
