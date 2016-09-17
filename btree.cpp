@@ -5,6 +5,9 @@
 #include <sstream>
 #include <stdio.h>
 #include <cctype>
+#include <cstdio>
+#include <ctime>
+
 
 using namespace std;
 
@@ -65,7 +68,7 @@ class TableBaseClass
       char OpenMode;      // r or w (read or write) mode for the table
 };
 
-void Error(char * msg)
+void Error(const char * msg)
 {
     cerr << msg << endl;
     exit(1);
@@ -421,6 +424,7 @@ bool BTTableClass::Retrieve(KeyFieldType SearchKey, ItemType & Item)
         else
             CurrentRoot = CurrentNode.Branch[Location + 1];
     }
+    
     return Found;
 }
 
@@ -494,7 +498,10 @@ long ReadLine(fstream & InputFile, KeyFieldType Word,
     InputFile.getline(Line, LineMax);
 
     for (k = 0; k < KeyFieldMax; k++)
-        Word[k] = Line[k];
+    {
+		Word[k] = Line[k];
+	}
+        
     Word[KeyFieldMax] = NULLCHAR;
 
     int currentLength = strlen(Line);
@@ -514,9 +521,10 @@ void Load(fstream & InputFile, BTTableClass & Table)
     int Count;
     Count = 0;
     Item.DataField = ReadLine(InputFile, Item.KeyField, Item.DataField);
+    
     // DEBUGGING
-    //cout << " LoadKey: " << Item.KeyField << endl;
-    //cout << " LoadOffset: " << Item.DataField << endl;
+    cout << " LoadKey: " << Item.KeyField << endl;
+    cout << " LoadOffset: " << Item.DataField << endl;
     while (! InputFile.fail())
     {
         Table.Insert(Item);
@@ -524,44 +532,18 @@ void Load(fstream & InputFile, BTTableClass & Table)
     }
 }
 
-/**
-* Not used anymore. Created while taking input from UI
-*/
-bool ReadKeyboard(KeyFieldType Word)
-{
-    int k, ch;
-    bool start;
-
-    cin >> Word;
-    cin.get();
-    if (Word[0] == '.')
-        return false;
-    start = true;
-
-    for (k = 0; k < KeyFieldMax; k++)
-    {
-        ch = Word[k];
-        if (ch == '\0')
-            start = false;
-        if (start)
-            Word[k] = toupper(ch);
-        else
-            Word[k] = ' ';
-    }
-    Word[KeyFieldMax] = NULLCHAR;
-    return true;
-}
-
 int main(int argc, char* argv[])
 {
-
+	clock_t start;
+    double duration;
+        		
     // Creating New File
     if (strcmp(argv[1],"-create") == 0)
     {
         KeyFieldMax = atoi(argv[2]);
         InputFileName = argv[3];
         IndexFileName = argv[4];
-
+        
         fstream Source;
         BTTableClass BTTable('w', IndexFileName);
 
@@ -594,9 +576,12 @@ int main(int argc, char* argv[])
             SearchKey[i]=TempSearchKey[i];
         }
         SearchKey[i]= NULLCHAR;
+        
+        // start timing the retrieval operation
+		start = clock();
 
         if (BTTable.Retrieve(SearchKey, Item))
-        {
+        {			
             fstream OldInputFile;
             string line;
             OldInputFile.open(InputFileName, ios::in | ios::binary);
@@ -609,13 +594,20 @@ int main(int argc, char* argv[])
                     break;
                 }
                 getline(OldInputFile, line);
-                int currentLength = line.length() -1;
+                int currentLength = line.length();
                 offset += currentLength;
             }
         }
         else
-            cout << "Not found" << endl;
-    return 0;
+        {
+			cout << "Not found" << endl;
+		}
+		
+		// end timing of retrieval operation
+		duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+		cout << "Query ran in " << duration << "ms\n";
+            
+		return 0;
     }
 
     // Inserting new Record into Index file
